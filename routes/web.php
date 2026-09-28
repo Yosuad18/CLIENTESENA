@@ -11,6 +11,10 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\TrainingCenterController;
 
+Route::get('/', function () {
+    return view('home');
+})->name('home');
+
 Route::get('areas', [AreaController::class, 'index'])->name('areas');
 Route::get('areas/{area}', [AreaController::class, 'show'])->name('area.show');
 Route::get('computers', [ComputerController::class, 'index'])->name('computers');

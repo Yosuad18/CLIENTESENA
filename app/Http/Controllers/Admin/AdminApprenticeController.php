@@ -2,39 +2,42 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
-class AdminApprenticeController extends BaseAdminController
+class AdminApprenticeController extends Controller
 {
-    protected function redirectRoute(): string
-    {
-        return 'admin.apprentices.index';
-    }
-
     private function relations()
     {
+        $url = env('URL_SERVER_API');
+
         return [
-            'courses' => $this->list('/courses'),
-            'computers' => $this->list('/computers'),
+            'courses' => json_decode(json_encode(Http::get($url . '/courses')->json())) ?? [],
+            'computers' => json_decode(json_encode(Http::get($url . '/computers')->json())) ?? [],
         ];
     }
 
-    public function index()
-    {
-        $apprentices = $this->list('/apprenticees?included=course,computer');
+    public function index(){ //http://api.codersfree.test/v1/categories?included=posts
+
+        $url = env('URL_SERVER_API');
+
+        $apprentices = json_decode(json_encode(Http::get($url . '/apprentices?included=course,computer')->json())) ?? [];
 
         return view('admin.apprentices.index', compact('apprentices'));
     }
 
-    public function create()
-    {
+    public function create(){
+
         $relations = $this->relations();
 
         return view('admin.apprentices.create', $relations);
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'surname' => 'nullable|string|max:255',
@@ -47,14 +50,35 @@ class AdminApprenticeController extends BaseAdminController
             'computer_id' => 'nullable',
         ]);
 
-        return $this->persist($request, 'post', '/apprenticees', $data, 'image', 'Aprendiz creado correctamente.');
+        $response = Http::post($url . '/apprentices', $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.apprentices.index')->with('success', 'Aprendiz creado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function edit($id)
-    {
-        $apprentice = $this->item('/apprenticees/' . $id);
+    public function show($id){
 
-        if (!$apprentice) {
+        $url = env('URL_SERVER_API');
+
+        $apprentice = json_decode(json_encode(Http::get($url . '/apprentices/' . $id . '?included=course,computer')->json()));
+
+        if (!$apprentice || !isset($apprentice->id)) {
+            return redirect()->route('admin.apprentices.index')->with('error', 'El aprendiz no fue encontrado.');
+        }
+
+        return view('admin.apprentices.show', compact('apprentice'));
+    }
+
+    public function edit($id){
+
+        $url = env('URL_SERVER_API');
+
+        $apprentice = json_decode(json_encode(Http::get($url . '/apprentices/' . $id)->json()));
+
+        if (!$apprentice || !isset($apprentice->id)) {
             return redirect()->route('admin.apprentices.index')->with('error', 'El aprendiz no fue encontrado.');
         }
 
@@ -63,8 +87,10 @@ class AdminApprenticeController extends BaseAdminController
         return view('admin.apprentices.edit', array_merge($relations, compact('apprentice')));
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'surname' => 'nullable|string|max:255',
@@ -77,11 +103,25 @@ class AdminApprenticeController extends BaseAdminController
             'computer_id' => 'nullable',
         ]);
 
-        return $this->persist($request, 'put', '/apprenticees/' . $id, $data, 'image', 'Aprendiz actualizado correctamente.');
+        $response = Http::put($url . '/apprentices/' . $id, $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.apprentices.index')->with('success', 'Aprendiz actualizado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function destroy($id)
-    {
-        return $this->destroyRecord('/apprenticees/' . $id, 'Aprendiz eliminado correctamente.');
+    public function destroy($id){
+
+        $url = env('URL_SERVER_API');
+
+        $response = Http::delete($url . '/apprentices/' . $id);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.apprentices.index')->with('success', 'Aprendiz eliminado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo eliminar el registro.');
     }
 }

@@ -32,12 +32,12 @@ Route::get('apprentices', [ApprenticeController::class, 'index'])->name('apprent
 Route::prefix('administracion')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('areas', AdminAreaController::class)->except('show');
-    Route::resource('courses', AdminCourseController::class)->except('show');
-    Route::resource('teachers', AdminTeacherController::class)->except('show');
-    Route::resource('apprentices', AdminApprenticeController::class)->except('show');
-    Route::resource('computers', AdminComputerController::class)->except('show');
-    Route::resource('training-centers', AdminTrainingCenterController::class)->except('show');
+    Route::resource('areas', AdminAreaController::class);
+    Route::resource('courses', AdminCourseController::class);
+    Route::resource('teachers', AdminTeacherController::class);
+    Route::resource('apprentices', AdminApprenticeController::class);
+    Route::resource('computers', AdminComputerController::class);
+    Route::resource('training-centers', AdminTrainingCenterController::class);
 
     Route::get('course-teachers', [AdminCourseTeacherController::class, 'index'])->name('course-teachers.index');
 });

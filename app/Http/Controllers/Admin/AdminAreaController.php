@@ -2,58 +2,96 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
-class AdminAreaController extends BaseAdminController
+class AdminAreaController extends Controller
 {
-    protected function redirectRoute(): string
-    {
-        return 'admin.areas.index';
-    }
+    public function index(){ //http://api.codersfree.test/v1/categories?included=posts
 
-    public function index()
-    {
-        $areas = $this->list('/areas');
+        $url = env('URL_SERVER_API');
+
+        $areas = json_decode(json_encode(Http::get($url . '/areas')->json())) ?? [];
 
         return view('admin.areas.index', compact('areas'));
     }
 
-    public function create()
-    {
+    public function create(){
+
         return view('admin.areas.create');
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        return $this->persist($request, 'post', '/areas', $data, 'image', 'Área creada correctamente.');
+        $response = Http::post($url . '/areas', $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.areas.index')->with('success', 'Área creada correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function edit($id)
-    {
-        $area = $this->item('/areas/' . $id);
+    public function show($id){
 
-        if (!$area) {
+        $url = env('URL_SERVER_API');
+
+        $area = json_decode(json_encode(Http::get($url . '/areas/' . $id)->json()));
+
+        if (!$area || !isset($area->id)) {
+            return redirect()->route('admin.areas.index')->with('error', 'El área no fue encontrada.');
+        }
+
+        return view('admin.areas.show', compact('area'));
+    }
+
+    public function edit($id){
+
+        $url = env('URL_SERVER_API');
+
+        $area = json_decode(json_encode(Http::get($url . '/areas/' . $id)->json()));
+
+        if (!$area || !isset($area->id)) {
             return redirect()->route('admin.areas.index')->with('error', 'El área no fue encontrada.');
         }
 
         return view('admin.areas.edit', compact('area'));
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        return $this->persist($request, 'put', '/areas/' . $id, $data, 'image', 'Área actualizada correctamente.');
+        $response = Http::put($url . '/areas/' . $id, $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.areas.index')->with('success', 'Área actualizada correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function destroy($id)
-    {
-        return $this->destroyRecord('/areas/' . $id, 'Área eliminada correctamente.');
+    public function destroy($id){
+
+        $url = env('URL_SERVER_API');
+
+        $response = Http::delete($url . '/areas/' . $id);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.areas.index')->with('success', 'Área eliminada correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo eliminar el registro.');
     }
 }

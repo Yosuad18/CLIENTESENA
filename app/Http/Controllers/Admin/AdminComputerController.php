@@ -2,60 +2,98 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
-class AdminComputerController extends BaseAdminController
+class AdminComputerController extends Controller
 {
-    protected function redirectRoute(): string
-    {
-        return 'admin.computers.index';
-    }
+    public function index(){ //http://api.codersfree.test/v1/categories?included=posts
 
-    public function index()
-    {
-        $computers = $this->list('/computers');
+        $url = env('URL_SERVER_API');
+
+        $computers = json_decode(json_encode(Http::get($url . '/computers')->json())) ?? [];
 
         return view('admin.computers.index', compact('computers'));
     }
 
-    public function create()
-    {
+    public function create(){
+
         return view('admin.computers.create');
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'brand' => 'required|string|max:255',
             'number' => 'required|string|max:255',
         ]);
 
-        return $this->persist($request, 'post', '/computers', $data, 'image', 'Computador creado correctamente.');
+        $response = Http::post($url . '/computers', $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.computers.index')->with('success', 'Computador creado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function edit($id)
-    {
-        $computer = $this->item('/computers/' . $id);
+    public function show($id){
 
-        if (!$computer) {
+        $url = env('URL_SERVER_API');
+
+        $computer = json_decode(json_encode(Http::get($url . '/computers/' . $id)->json()));
+
+        if (!$computer || !isset($computer->id)) {
+            return redirect()->route('admin.computers.index')->with('error', 'El computador no fue encontrado.');
+        }
+
+        return view('admin.computers.show', compact('computer'));
+    }
+
+    public function edit($id){
+
+        $url = env('URL_SERVER_API');
+
+        $computer = json_decode(json_encode(Http::get($url . '/computers/' . $id)->json()));
+
+        if (!$computer || !isset($computer->id)) {
             return redirect()->route('admin.computers.index')->with('error', 'El computador no fue encontrado.');
         }
 
         return view('admin.computers.edit', compact('computer'));
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
+
+        $url = env('URL_SERVER_API');
+
         $data = $request->validate([
             'brand' => 'required|string|max:255',
             'number' => 'required|string|max:255',
         ]);
 
-        return $this->persist($request, 'put', '/computers/' . $id, $data, 'image', 'Computador actualizado correctamente.');
+        $response = Http::put($url . '/computers/' . $id, $data);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.computers.index')->with('success', 'Computador actualizado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo guardar el registro.')->withInput();
     }
 
-    public function destroy($id)
-    {
-        return $this->destroyRecord('/computers/' . $id, 'Computador eliminado correctamente.');
+    public function destroy($id){
+
+        $url = env('URL_SERVER_API');
+
+        $response = Http::delete($url . '/computers/' . $id);
+
+        if ($response->successful()) {
+            return redirect()->route('admin.computers.index')->with('success', 'Computador eliminado correctamente.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'No se pudo eliminar el registro.');
     }
 }

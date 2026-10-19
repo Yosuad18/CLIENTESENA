@@ -7,6 +7,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ApprenticeController;
 use App\Http\Controllers\TrainingCenterController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminAreaController;
 use App\Http\Controllers\Admin\AdminCourseController;
@@ -28,6 +29,8 @@ Route::get('teachers', [TeacherController::class, 'index'])->name('teachers');
 Route::get('courses', [CourseController::class, 'index'])->name('courses');
 Route::put('courses/{course}/image', [CourseController::class, 'updateImage'])->name('courses.updateImage');
 Route::get('apprentices', [ApprenticeController::class, 'index'])->name('apprentices.index');
+
+Route::get('panel-admin', [AdminController::class, 'index'])->name('panel-admin');
 
 Route::prefix('administracion')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');

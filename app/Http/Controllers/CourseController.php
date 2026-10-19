@@ -10,7 +10,7 @@ class CourseController extends Controller
     private function fetchDataFromApi($url)
     {
         $response = Http::get($url);
-        return $response->json();
+        return json_decode(json_encode($response->json()));
     }
 
     public function index() { //http://api.codersfree.test/v1/categories?included=posts

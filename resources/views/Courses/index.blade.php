@@ -6,7 +6,7 @@
         <h3 class="fw-bold mb-0" style="color: var(--sena-dark);">
             <i class="fas fa-layer-group text-success me-2"></i>Gestión de Cursos y Fichas
         </h3>
-        <a href="{{ route('courses.create') }}" class="btn btn-sena">
+        <a href="{{ route('admin.courses.create') }}" class="btn btn-sena">
             <i class="fas fa-plus-circle me-1"></i> Nuevo Curso
         </a>
     </div>
@@ -41,7 +41,7 @@
                         <td>{{ $course->name ?? '—' }}</td>
                         <td>{{ $course->day }}</td>
                         <td>
-                            <form action="{{ route('courses.updateImage', $course) }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                            <form action="{{ route('courses.updateImage', $course->id) }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
                                 @csrf
                                 @method('PUT')
                                 @if($course->image)
@@ -77,10 +77,10 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('courses.edit', $course) }}" class="btn btn-sm btn-outline-warning">
+                            <a href="{{ route('admin.courses.edit', $course->id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('courses.destroy', $course) }}" method="POST" class="d-inline-block">
+                            <form action="{{ route('admin.courses.destroy', $course->id) }}" method="POST" class="d-inline-block">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Confirma la eliminación?')">

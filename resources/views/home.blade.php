@@ -28,6 +28,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('apprentices.index') }}">Aprendices</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.dashboard') }}">Administración</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -43,6 +46,9 @@
             <div class="mt-4">
                 <a href="{{ route('apprentices.index') }}" class="btn btn-success btn-lg px-4 me-md-2 shadow-sm">
                     <i class="fa-solid fa-users me-2"></i> Ver Aprendices
+                </a>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-success btn-lg px-4 shadow-sm">
+                    <i class="fa-solid fa-gear me-2"></i> Administración
                 </a>
             </div>
         </div>
